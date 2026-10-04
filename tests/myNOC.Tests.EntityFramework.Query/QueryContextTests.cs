@@ -1,3 +1,4 @@
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using myNOC.EntityFramework.Query;
 using NSubstitute;
@@ -10,11 +11,14 @@ namespace myNOC.Tests.EntityFramework.Query
 	{
 		private TestContext _testDbContext = default!;
 		private QueryContext _queryContext = Substitute.ForPartsOf<QueryContext>();
+		private SqliteConnection _connection = default!;
 
 		[TestInitialize]
 		public void Initialize()
 		{
-			var options = new DbContextOptionsBuilder<TestContext>().UseInMemoryDatabase("testContext").Options;
+			_connection = new SqliteConnection("Data Source=:memory:");
+			_connection.Open();
+			var options = new DbContextOptionsBuilder<TestContext>().UseSqlite(_connection).Options;
 			_testDbContext = new TestContext(options);
 		}
 
@@ -22,8 +26,8 @@ namespace myNOC.Tests.EntityFramework.Query
 		[TestCleanup]
 		public void Cleanup()
 		{
-			_testDbContext?.Database?.EnsureDeleted();
 			_testDbContext?.Dispose();
+			_connection?.Dispose();
 		}
 
 		[TestMethod]

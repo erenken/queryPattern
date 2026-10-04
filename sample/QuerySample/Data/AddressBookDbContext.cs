@@ -7,15 +7,8 @@ namespace QuerySample.Data
 	{
 		public DbSet<ContactEntity> Contacts { get; set; } = default!;
 
-		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+		public AddressBookDbContext(DbContextOptions<AddressBookDbContext> options) : base(options)
 		{
-			optionsBuilder.UseInMemoryDatabase("AddressBook");
-			base.OnConfiguring(optionsBuilder);
-		}
-
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
-		{
-			base.OnModelCreating(modelBuilder);
 		}
 	}
 }

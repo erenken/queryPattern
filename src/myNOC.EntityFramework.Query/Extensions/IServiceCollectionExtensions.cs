@@ -1,4 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using System.Reflection;
 
 namespace myNOC.EntityFramework.Query.Extensions
 {
@@ -6,12 +8,21 @@ namespace myNOC.EntityFramework.Query.Extensions
 	{
 		public static IServiceCollection AddQueryPattern(this IServiceCollection services)
 		{
-			var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-			var contextTypes = assemblies.SelectMany(x => x.GetTypes()).CanImplement(typeof(IQueryContext));
-			var repositoryTypes = assemblies.SelectMany(x => x.GetTypes()).CanImplement(typeof(IQueryRepository));
+			return services.AddQueryPattern(AppDomain.CurrentDomain.GetAssemblies());
+		}
 
-			contextTypes.Apply(c => c.Interfaces.Apply(i => services.AddScoped(i, c.Type)));
-			repositoryTypes.Apply(c => c.Interfaces.Apply(i => services.AddScoped(i, c.Type)));
+		public static IServiceCollection AddQueryPattern(this IServiceCollection services, params Assembly[] assemblies)
+		{
+			ArgumentNullException.ThrowIfNull(services);
+			ArgumentNullException.ThrowIfNull(assemblies);
+
+			var types = assemblies.Distinct().SelectMany(assembly => assembly.GetTypes()).ToArray();
+			var implementations = types.CanImplement(typeof(IQueryContext))
+				.Concat(types.CanImplement(typeof(IQueryRepository)));
+
+			foreach (var implementation in implementations)
+				foreach (var serviceInterface in implementation.Interfaces)
+					services.TryAddEnumerable(ServiceDescriptor.Scoped(serviceInterface, implementation.Type));
 
 			return services;
 		}

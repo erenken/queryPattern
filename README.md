@@ -5,9 +5,14 @@
 
 ## Overview
 
-This *Query Pattern* is something I got from listening to a [.NET Rocks](https://www.dotnetrocks.com/) episode #1494 
+This *query-object pattern* is something I got from listening to a [.NET Rocks](https://www.dotnetrocks.com/) episode #1494
 [Developer Tips and Design Patterns with Steve Smith](https://www.dotnetrocks.com/details/1494).  [Steve Smith](https://ardalis.com/) talks about the 
 *Specification Pattern* at 49:50 in the podcast, and this is what inspired this.
+
+Each query object owns a use-case-specific read operation, including its criteria
+and projection. Unlike a classic specification, it describes the whole query
+rather than just reusable selection criteria. Existing package and API names
+such as `AddQueryPattern` remain unchanged.
 
 What Steve describes is a problem we saw in our projects.  Developers would keep adding more methods to the repository or keep adding JOINs to a result 
 because they need this one other column added to an already returning list.  This will start to overly complicate the original list.  For example, you 
@@ -17,6 +22,18 @@ So, where you needed a simple quick list of users is now doing way more than it 
 
 This pattern also gives you the ability to easily test your queries.  As Steve points out in the podcast what might work fine in compile time, 
 or even within a unit test using mocked lists as your data, could give you a runtime error when running against EntityFramework.  
+
+The sample and tests use SQLite in-memory databases, which execute actual SQL.
+EF Core's InMemory provider does not validate SQL translation. SQLite coverage
+does not guarantee compatibility with another provider: also test application
+queries against the database engine used in production.
+
+Contexts are injected and scoped, with one typed query-context/repository pair
+per `DbContext`; multiple databases remain independent. List and scalar execution
+support cancellation without removing the existing overloads. Automatic discovery
+still scans all loaded assemblies by default, with optional explicit assembly
+selection. See the [usage documentation](./src/myNOC.EntityFramework.Query/README.md)
+for configuration, multiple-context examples, and cancellation compatibility.
 
 ## Installation and supported frameworks
 
@@ -162,5 +179,19 @@ build props, GitVersion configuration and validation scripts.
 
 ## Documentation & Usage
 
-The documentation for the library can be found [here](./src/myNOC.EntityFramework.Query/README.md)
-A very simple sample project [here](./sample/QuerySample/).
+See the [library usage documentation](./src/myNOC.EntityFramework.Query/README.md)
+for scoped context registration, multiple databases, automatic discovery, query
+objects, and cancellation-aware execution.
+
+The [sample application](./sample/QuerySample/) creates and seeds a temporary
+SQLite in-memory database, then runs list and scalar queries. No external database
+server is required. Run it from the repository root for either supported target:
+
+```shell
+dotnet run --project sample/QuerySample --framework net8.0
+dotnet run --project sample/QuerySample --framework net10.0
+```
+
+The [tests](./tests/myNOC.Tests.EntityFramework.Query/) cover SQL translation and
+results, cancellation, assembly discovery, and isolation/disposal of multiple
+database contexts. Run both targets with `dotnet test QueryPattern.sln`.

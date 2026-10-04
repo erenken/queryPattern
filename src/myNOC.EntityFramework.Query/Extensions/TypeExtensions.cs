@@ -6,6 +6,7 @@ namespace myNOC.EntityFramework.Query.Extensions
 		{
 			var typeInterfaces = types.Where(x => !x.IsAbstract
 				&& !x.IsInterface
+				&& !x.ContainsGenericParameters
 				&& x.IsAssignableTo(interfaceType))
 				.Select(x => new TypeInterfaces(x)).ToList();
 
@@ -34,9 +35,6 @@ namespace myNOC.EntityFramework.Query.Extensions
 				yield return it;
 			}
 
-			if (type.BaseType != null && type.BaseType != typeof(System.Object))
-				foreach(var it in GetServiceInterfaces(type.BaseType))
-					yield return it;
 		}
 	}
 }

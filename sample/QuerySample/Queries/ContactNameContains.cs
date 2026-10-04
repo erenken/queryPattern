@@ -10,14 +10,14 @@ namespace QuerySample.Queries
 
 		public ContactNameContains(string namePart)
 		{
-			_namePart = namePart;
+			_namePart = namePart.ToUpperInvariant();
 		}
 
 		public IQueryable<ContactModel> Query(IQueryContext context)
 		{
 			var persons = context.Set<ContactEntity>();
 			var query = from p in persons
-						where p.Name.Contains(_namePart, StringComparison.InvariantCultureIgnoreCase)
+						where p.Name.ToUpper().Contains(_namePart)
 						select new ContactModel
 						{
 							Id = p.Id,

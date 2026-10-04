@@ -9,7 +9,7 @@
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 		<Title>myNOC.EntityFramework.Query</Title>
 		<Authors>myNOC LLC</Authors>
-		<Description>Implements a Query Pattern to be used with EntityFramework</Description>
+		<Description>Implements the query-object pattern for Entity Framework Core</Description>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 		<Copyright>Copyright © myNOC LLC 2025</Copyright>

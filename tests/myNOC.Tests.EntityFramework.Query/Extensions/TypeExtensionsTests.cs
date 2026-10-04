@@ -64,6 +64,7 @@ namespace myNOC.Tests.EntityFramework.Query.Extensions
 			Assert.AreEqual(2, results.Count());
 			Assert.IsNotNull(results.FirstOrDefault(x => x.Type == typeof(TestClass6)));
 			Assert.IsNotNull(results.FirstOrDefault(x => x.Type == typeof(TestClass8)));
+			Assert.IsTrue(results.All(result => result.Interfaces.Count == result.Interfaces.Distinct().Count()));
 			Assert.IsNull(results.FirstOrDefault(x => x.Type == typeof(TestClass4)));
 		}
 

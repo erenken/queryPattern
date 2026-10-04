@@ -5,7 +5,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="$(EntityFrameworkVersion)" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(EntityFrameworkVersion)" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(DependencyInjectionVersion)" />
 	</ItemGroup>
 
