@@ -1,5 +1,37 @@
 # myNOC.EntityFramework.Query
 
+## Installation and support
+
+```shell
+dotnet add package myNOC.EntityFramework.Query
+```
+
+Supports **.NET 8.0 and .NET 10.0** (LTS), using EF Core 8 and EF Core 10
+respectively. Match your application's Entity Framework packages to its target.
+See the [repository build instructions](https://github.com/erenken/queryPattern#local-build-and-validation)
+to build the library/sample and run tests against both frameworks.
+
+## Versions and publishing
+
+Stable packages are released from `main` only after all targets build without
+warnings/errors, tests pass, and packaged Source Link checks succeed. GitVersion
+automatically stamps package, assembly, file and informational versions. Work
+branches use preview versions for validation, not public publishing. Maintainers
+request minor/major releases using `+semver: minor` / `+semver: major` in commit
+or merge messages. Each release has a matching GitHub `v<version>` tag.
+Publishing uses GitHub OIDC through `NuGet/login` and a package-scoped NuGet
+Trusted Publishing policy, not a permanent API key. See the
+[release setup](https://github.com/erenken/queryPattern#ci-and-trusted-publishing).
+
+## Source Link debugging
+
+The `.snupkg` includes portable PDBs for .NET 8 and .NET 10. Source Link maps
+to the exact build commit and CI verifies matching source downloads/checksums.
+In Visual Studio, add `https://symbols.nuget.org/download/symbols` under
+**Tools > Options > Debugging > Symbols**, enable **Source Link support** and
+disable **Just My Code** to step into library methods. Symbols become available
+after NuGet finishes indexing the symbol package.
+
 ## Overview
 
 A library used to create EntityFramework queries.

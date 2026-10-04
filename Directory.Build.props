@@ -1,0 +1,21 @@
+<Project>
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <LangVersion>14.0</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <IsPackable>false</IsPackable>
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+    <EntityFrameworkVersion Condition="'$(TargetFramework)' == 'net8.0'">8.0.31</EntityFrameworkVersion>
+    <EntityFrameworkVersion Condition="'$(TargetFramework)' == 'net10.0'">10.0.12</EntityFrameworkVersion>
+    <DependencyInjectionVersion Condition="'$(TargetFramework)' == 'net8.0'">8.0.1</DependencyInjectionVersion>
+    <DependencyInjectionVersion Condition="'$(TargetFramework)' == 'net10.0'">10.0.12</DependencyInjectionVersion>
+  </PropertyGroup>
+  <Import Project="$(VersionPropsFile)" Condition="'$(VersionPropsFile)' != '' and Exists('$(VersionPropsFile)')" />
+</Project>

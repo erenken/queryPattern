@@ -1,23 +1,33 @@
+mode: ContinuousDeployment
+tag-prefix: '[vV]?'
+assembly-versioning-scheme: MajorMinorPatch
+assembly-file-versioning-scheme: MajorMinorPatch
+commit-message-incrementing: Enabled
+major-version-bump-message: '\+semver:\s?(breaking|major)'
+minor-version-bump-message: '\+semver:\s?(feature|minor)'
+patch-version-bump-message: '\+semver:\s?(fix|patch)'
+no-bump-message: '\+semver:\s?(none|skip)'
 branches:
   main:
     regex: ^main$
-    mode: ContinuousDelivery
-    tag: ''
+    label: ''
     increment: Patch
-    prevent-increment-of-merged-branch-version: true
-    track-merge-target: false
-    source-branches: [ 'work' ]
-    tracks-release-branches: true
-    is-mainline: true
-  work:
-    regex: ^work?[/-]
-    mode: ContinuousDeployment
-    tag: alpha
-    increment: Minor
-    prevent-increment-of-merged-branch-version: false
-    track-merge-target: true
-    source-branches: []
-    tracks-release-branches: true
-    is-release-branch: false
-    is-mainline: false
-    pre-release-weight: 0
+    is-main-branch: true
+    prevent-increment:
+      of-merged-branch: true
+      when-current-commit-tagged: true
+  feature:
+    regex: ^(feature|work|build|fix|chore)[/-](?<BranchName>.+)
+    mode: ContinuousDelivery
+    label: alpha.{BranchName}
+    increment: Inherit
+    source-branches: [main]
+  pull-request:
+    mode: ContinuousDelivery
+    label: pr{Number}
+    increment: Inherit
+  unknown:
+    mode: ContinuousDelivery
+    label: preview.{BranchName}
+    increment: Inherit
+    source-branches: [main]
