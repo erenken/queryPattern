@@ -18,7 +18,7 @@ namespace myNOC.Tests.EntityFramework.Query.Extensions
 
 			//	Assert
 			Assert.IsNotNull(results);
-			Assert.IsInstanceOfType(results, typeof(IServiceCollection));
+			Assert.IsInstanceOfType<IServiceCollection>(results);
 
 			Assert.IsNotNull(results.FirstOrDefault(x => x.ImplementationType == typeof(TestQueryContext)
 				&& x.ServiceType == typeof(IQueryContext)

@@ -2,35 +2,112 @@ name: Build and Test
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
+  push:
+    branches-ignore: [main]
+  workflow_call:
+    outputs:
+      version:
+        value: ${{ jobs.build-test.outputs.version }}
+      sha:
+        value: ${{ jobs.build-test.outputs.sha }}
+      artifact-name:
+        value: ${{ jobs.build-test.outputs.artifact-name }}
+
+permissions:
+  contents: read
 
 jobs:
-  build-test:
+  workflow-lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Setup .NET Core 8
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 8.x
-
-    - name: Setup .NET Core 9
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 9.x
-
-    - name: Install dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build --no-restore
-
-    - name: Test
-      run: dotnet test --no-restore --verbosity normal --logger trx --collect:"XPlat Code Coverage" --no-build
-    
-    - name: Test Pack nuget
-      run: |
-         dotnet pack --no-build --no-restore --include-symbols --verbosity normal --configuration Debug
-      
+      - uses: actions/checkout@v7.0.1
+      - name: Validate workflow syntax and shell scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          tool_dir="$RUNNER_TEMP/actionlint"
+          mkdir -p "$tool_dir"
+          cd "$tool_dir"
+          base=https://github.com/rhysd/actionlint/releases/download/v1.7.12
+          curl -fsSLO "$base/actionlint_1.7.12_linux_amd64.tar.gz"
+          curl -fsSLO "$base/actionlint_1.7.12_checksums.txt"
+          sha256sum --check --ignore-missing actionlint_1.7.12_checksums.txt
+          tar -xzf actionlint_1.7.12_linux_amd64.tar.gz
+          cd "$GITHUB_WORKSPACE"
+          "$tool_dir/actionlint"
+          git diff --check
+  build-test:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      sha: ${{ steps.version.outputs.sha }}
+      artifact-name: ${{ steps.version.outputs.artifact-name }}
+    env:
+      VersionPropsFile: ${{ github.workspace }}/artifacts/Version.props
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-dotnet@v6.0.0
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.401
+      - name: Restore validation tools
+        run: dotnet tool restore
+      - name: Validate version scenarios
+        shell: pwsh
+        run: ./scripts/Test-Versioning.ps1
+      - name: Calculate and stamp versions
+        id: version
+        shell: pwsh
+        run: ./scripts/Set-BuildVersion.ps1 -RequireStable:($env:GITHUB_REF -eq 'refs/heads/main')
+      - name: Restore (warnings are errors)
+        run: dotnet restore -warnaserror
+      - name: Build every framework (warnings are errors)
+        run: dotnet build --configuration Release --no-restore -warnaserror
+      - name: Test every framework and collect coverage
+        run: dotnet test --configuration Release --no-build --no-restore --logger trx --collect:"XPlat Code Coverage" --results-directory artifacts/test-results
+      - name: Upload test results and coverage
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: test-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/test-results
+          if-no-files-found: error
+      - name: Pack (warnings are errors)
+        run: dotnet pack src/myNOC.EntityFramework.Query --configuration Release --no-build --no-restore -warnaserror --output artifacts/packages
+      - name: Validate packaged Source Link, symbols and versions
+        shell: pwsh
+        env:
+          PACKAGE_VERSION: ${{ steps.version.outputs.version }}
+          BUILD_COMMIT: ${{ steps.version.outputs.sha }}
+        run: ./scripts/Test-Packages.ps1 -Version $env:PACKAGE_VERSION -Commit $env:BUILD_COMMIT
+      - name: Audit dependencies
+        run: |
+          dotnet list package --vulnerable --include-transitive --format json > artifacts/vulnerabilities.json
+          dotnet list package --outdated --include-transitive --format json > artifacts/outdated.json
+      - name: Reject known vulnerabilities
+        shell: pwsh
+        run: |
+          $report = Get-Content artifacts/vulnerabilities.json -Raw | ConvertFrom-Json
+          $packages = @($report.projects.frameworks.topLevelPackages) + @($report.projects.frameworks.transitivePackages)
+          if (@($packages | Where-Object { $_.vulnerabilities.Count -gt 0 }).Count -gt 0) { throw 'Known vulnerable dependencies found.' }
+      - name: Upload dependency reports
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: dependency-reports-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            artifacts/vulnerabilities.json
+            artifacts/outdated.json
+          if-no-files-found: error
+      - name: Upload validated packages
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: packages-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/packages/*
+          if-no-files-found: error

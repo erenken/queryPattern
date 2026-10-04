@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "gitversion.tool": {
+      "version": "6.8.2",
+      "commands": ["dotnet-gitversion"]
+    },
+    "sourcelink": {
+      "version": "3.1.1",
+      "commands": ["sourcelink"]
+    }
+  }
+}
