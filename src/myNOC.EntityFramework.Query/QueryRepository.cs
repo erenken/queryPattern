@@ -11,16 +11,27 @@ namespace myNOC.EntityFramework.Query
 			_context = context;
 		}
 
-		public async Task<IEnumerable<TModel>> Query<TModel>(IQueryList<TModel> query) where TModel : class
+		public Task<IEnumerable<TModel>> Query<TModel>(IQueryList<TModel> query) where TModel : class
 		{
-			var result = query.Query(_context);
-			return await result.ToListAsync();
+			return Query(query, CancellationToken.None);
 		}
 
-		public async Task<TReturn?> Query<TReturn>(IQueryScalar<TReturn> query)
+		public async Task<IEnumerable<TModel>> Query<TModel>(IQueryList<TModel> query, CancellationToken cancellationToken) where TModel : class
 		{
-			var result = await query.GetScalar(_context);
-			return result;
+			cancellationToken.ThrowIfCancellationRequested();
+			var result = query.Query(_context);
+			return await result.ToListAsync(cancellationToken);
+		}
+
+		public Task<TReturn?> Query<TReturn>(IQueryScalar<TReturn> query)
+		{
+			return Query(query, CancellationToken.None);
+		}
+
+		public Task<TReturn?> Query<TReturn>(IQueryScalar<TReturn> query, CancellationToken cancellationToken)
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+			return query.GetScalar(_context, cancellationToken);
 		}
 	}
 }

@@ -5,12 +5,15 @@ namespace QuerySample.Data
 {
 	public class AddressBookContext : QueryContext, IAddressBookContext
 	{
-		private DbContext? _dbContext = null;
+		private readonly AddressBookDbContext _dbContext;
+
+		public AddressBookContext(AddressBookDbContext dbContext)
+		{
+			_dbContext = dbContext;
+		}
+
 		public override DbContext GetContext()
 		{
-			if (_dbContext == null)
-				_dbContext = new AddressBookDbContext();
-
 			return _dbContext;
 		}
 	}

@@ -6,7 +6,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="$(EntityFrameworkVersion)" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(EntityFrameworkVersion)" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
 		<PackageReference Include="MSTest.TestAdapter" Version="4.4.1" />
 		<PackageReference Include="MSTest.TestFramework" Version="4.4.1" />
@@ -19,6 +19,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\src\myNOC.EntityFramework.Query\myNOC.EntityFramework.Query.csproj" />
+		<ProjectReference Include="..\..\sample\QuerySample\QuerySample.csproj" />
 	</ItemGroup>
 
 </Project>
