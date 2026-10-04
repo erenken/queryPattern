@@ -102,6 +102,9 @@ Test results, coverage, dependency reports and validated packages are artifacts.
 then publishes only from `main` using the `nuget` GitHub environment.
 Repository workflow token permissions default to read-only; the publishing job
 alone receives `contents: write` and `id-token: write`.
+Branch protection requires successful `build-test` and `workflow-lint` checks,
+an up-to-date branch and resolved conversations. Merged branches are deleted
+automatically; force-pushes and deletion of `main` are disallowed.
 
 Trusted Publishing configuration for this repository:
 
@@ -127,7 +130,11 @@ It is retained during the PR so the existing `main` workflow is not broken.
 Releases are serialized. The workflow checks that an existing version tag
 points to the exact build commit, explicitly publishes packages and symbols
 with duplicate skipping, then creates a stable GitHub release and `v<version>`
-tag. Existing releases are reused and assets refreshed on reruns. A failed-job
+tag. A previously published NuGet version must have matching repository commit
+metadata; a collision from a different commit fails rather than silently
+skipping and creating a misleading tag. After pushing, the workflow waits for
+package availability and verifies that provenance again before creating the
+release. Existing releases are reused and assets refreshed on reruns. A failed-job
 rerun downloads the original successful validation job's package artifact.
 NuGet or symbol indexing may finish after the push completes; unrelated
 authentication/network errors fail the job rather than being ignored.

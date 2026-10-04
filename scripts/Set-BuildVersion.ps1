@@ -7,8 +7,8 @@ $ErrorActionPreference = 'Stop'
 $versionJson = & dotnet gitversion /output json /nofetch
 if ($LASTEXITCODE -ne 0) { throw 'GitVersion failed.' }
 $version = ($versionJson -join "`n") | ConvertFrom-Json
-if ($RequireStable -and ($version.BranchName -ne 'main' -or $version.SemVer -cnotmatch '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$')) {
-    throw "Only stable major.minor.patch versions from main may publish: $($version.SemVer)"
+if ($RequireStable) {
+    & "$PSScriptRoot/Assert-StableRelease.ps1" -Version $version.SemVer -Branch $version.BranchName
 }
 $properties = [ordered]@{
     Version = $version.SemVer

@@ -2,7 +2,16 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 $scratch = Join-Path ([System.IO.Path]::GetTempPath()) ([guid]::NewGuid().ToString())
 $githubActions = $env:GITHUB_ACTIONS
-$env:GITHUB_ACTIONS = 'false'
+& "$PSScriptRoot/Assert-StableRelease.ps1" -Version '1.2.3' -Branch main
+foreach ($invalidVersion in @('1.2.3-alpha.1', '1.2.3+build', '1.2.3.4', '01.2.3')) {
+    $rejected = $false
+    try { & "$PSScriptRoot/Assert-StableRelease.ps1" -Version $invalidVersion -Branch main } catch { $rejected = $true }
+    if (!$rejected) { throw "Release guard accepted invalid version: $invalidVersion" }
+}
+$rejected = $false
+try { & "$PSScriptRoot/Assert-StableRelease.ps1" -Version '1.2.3' -Branch work/preview } catch { $rejected = $true }
+if (!$rejected) { throw 'Release guard accepted a non-main branch.' }
+Write-Host 'Verified stable-only release guard rejects prereleases, metadata, invalid versions and non-main branches.'
 function Invoke-Git {
     & git -C $scratch @args
     if ($LASTEXITCODE -ne 0) { throw "git failed: $args" }
@@ -18,6 +27,7 @@ function Assert-Version([string]$Expected) {
     Write-Host "Verified $Expected"
 }
 try {
+    $env:GITHUB_ACTIONS = 'false'
     [System.IO.Directory]::CreateDirectory($scratch) | Out-Null
     Invoke-Git init --initial-branch=main
     Copy-Item "$root/GitVersion.yml" "$scratch/GitVersion.yml"
@@ -51,6 +61,10 @@ try {
     Invoke-Git checkout main
     Invoke-Git -c user.name=VersionTests -c user.email=version-tests@example.invalid -c commit.gpgsign=false merge --no-ff work/version-preview -m 'Merge preview +semver: minor'
     Assert-Version '2.1.0'
+    Invoke-Git tag v2.1.0
+    Invoke-Git checkout -b pull/123
+    Add-Commit 'Pull request preview'
+    Assert-Version '2.1.1-pr123.1'
 } finally {
     $env:GITHUB_ACTIONS = $githubActions
     if ([System.IO.Path]::GetDirectoryName([System.IO.Path]::GetFullPath($scratch)) -ne [System.IO.Path]::GetTempPath().TrimEnd('\', '/')) {

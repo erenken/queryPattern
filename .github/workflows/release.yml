@@ -48,6 +48,9 @@ jobs:
           if git show-ref --verify --quiet "refs/tags/$tag"; then
             [[ "$(git rev-list -n 1 "$tag")" == "$BUILD_COMMIT" ]]
           fi
+      - name: Verify existing package provenance before duplicate skipping
+        shell: pwsh
+        run: ./scripts/Test-PublishedPackage.ps1 -Version $env:PACKAGE_VERSION -Commit $env:BUILD_COMMIT -AllowMissing
       - name: Authenticate to NuGet using GitHub OIDC
         uses: NuGet/login@v1.2.0
         id: login
@@ -61,6 +64,9 @@ jobs:
           set -euo pipefail
           dotnet nuget push "artifacts/packages/*.nupkg" --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY" --no-symbols --skip-duplicate
           dotnet nuget push "artifacts/packages/*.snupkg" --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY" --skip-duplicate
+      - name: Verify published package matches this commit
+        shell: pwsh
+        run: ./scripts/Test-PublishedPackage.ps1 -Version $env:PACKAGE_VERSION -Commit $env:BUILD_COMMIT -Attempts 60
       - name: Create matching stable GitHub release and tag
         env:
           GH_TOKEN: ${{ github.token }}
@@ -71,6 +77,6 @@ jobs:
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release edit "$tag" --repo "$GITHUB_REPOSITORY" --draft=false --prerelease=false
           else
-            gh release create "$tag" --repo "$GITHUB_REPOSITORY" --target "$BUILD_COMMIT" --title "$tag" --generate-notes
+            gh release create "$tag" --repo "$GITHUB_REPOSITORY" --target "$BUILD_COMMIT" --title "$tag" --generate-notes --draft=false --prerelease=false
           fi
           gh release upload "$tag" artifacts/packages/* --repo "$GITHUB_REPOSITORY" --clobber

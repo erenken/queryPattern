@@ -28,6 +28,23 @@ try {
         $assembly = "$scratch/package/lib/$framework/$packageId.dll"
         $pdb = "$scratch/symbols/lib/$framework/$packageId.pdb"
         if (!(Test-Path $assembly) -or !(Test-Path $pdb)) { throw "Missing DLL/PDB for $framework." }
+        $assemblyStream = [System.IO.File]::OpenRead($assembly)
+        $pdbStream = [System.IO.File]::OpenRead($pdb)
+        $peReader = [System.Reflection.PortableExecutable.PEReader]::new($assemblyStream)
+        $pdbProvider = [System.Reflection.Metadata.MetadataReaderProvider]::FromPortablePdbStream($pdbStream)
+        try {
+            $codeViewEntries = @($peReader.ReadDebugDirectory() | Where-Object { $_.Type -eq 'CodeView' })
+            if ($codeViewEntries.Count -ne 1) { throw "Expected one CodeView entry for $framework." }
+            $codeView = $peReader.ReadCodeViewDebugDirectoryData($codeViewEntries[0])
+            $pdbId = $pdbProvider.GetMetadataReader().DebugMetadataHeader.Id
+            $pdbGuid = [guid]::new([byte[]]$pdbId[0..15])
+            if ($codeView.Guid -ne $pdbGuid -or $codeView.Age -ne 1) { throw "DLL/PDB identity mismatch for $framework." }
+        } finally {
+            $pdbProvider.Dispose()
+            $peReader.Dispose()
+            $pdbStream.Dispose()
+            $assemblyStream.Dispose()
+        }
         $assemblyVersion = [System.Reflection.AssemblyName]::GetAssemblyName($assembly).Version.ToString()
         $stableVersion = ($Version -split '-')[0]
         if ($assemblyVersion -ne "$stableVersion.0") { throw "Incorrect assembly version: $assemblyVersion" }
