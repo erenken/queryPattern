@@ -74,7 +74,7 @@ jobs:
         run: dotnet test --configuration Release --no-build --no-restore --logger trx --collect:"XPlat Code Coverage" --results-directory artifacts/test-results
       - name: Upload test results and coverage
         if: always()
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: test-results-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/test-results
@@ -98,7 +98,7 @@ jobs:
           $packages = @($report.projects.frameworks.topLevelPackages) + @($report.projects.frameworks.transitivePackages)
           if (@($packages | Where-Object { $_.vulnerabilities.Count -gt 0 }).Count -gt 0) { throw 'Known vulnerable dependencies found.' }
       - name: Upload dependency reports
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: dependency-reports-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
@@ -106,7 +106,7 @@ jobs:
             artifacts/outdated.json
           if-no-files-found: error
       - name: Upload validated packages
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: packages-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/packages/*
