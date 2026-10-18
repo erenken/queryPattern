@@ -17,6 +17,9 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageProjectUrl>https://github.com/erenken/queryPattern</PackageProjectUrl>
 		<EnablePackageValidation>true</EnablePackageValidation>
+		<PackageReleaseNotes>Breaking change in 1.0.0: .NET 8 and EF Core 8 support has been removed. Target .NET 10 with EF Core 10 or .NET 11 with EF Core 11 RC2 (11.0.0-rc.2.26504.105).</PackageReleaseNotes>
+		<!-- EF Core 11 RC2 is an intentional go-live prerelease dependency. Remove this exception when upgrading to EF Core 11 GA. -->
+		<NoWarn>$(NoWarn);NU5104</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>

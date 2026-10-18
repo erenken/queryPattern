@@ -21,10 +21,19 @@ try {
     if (Get-ChildItem "$scratch/package" -Recurse -Filter '*.pdb') {
         throw 'Portable PDBs must be in the symbol package, not the primary package.'
     }
-    $frameworks = @('net8.0', 'net10.0')
+    $frameworks = @('net10.0', 'net11.0')
+    $assemblies = @(Get-ChildItem "$scratch/package/lib" -Recurse -Filter '*.dll')
+    if ($assemblies.Count -ne $frameworks.Count) { throw 'Expected one packaged DLL per supported target framework.' }
+    if (@($metadata.dependencies.group).Count -ne $frameworks.Count) { throw 'Expected one dependency group per supported target framework.' }
     $pdbs = @(Get-ChildItem "$scratch/symbols" -Recurse -Filter '*.pdb')
     if ($pdbs.Count -ne $frameworks.Count) { throw 'Expected one packaged PDB per target framework.' }
     foreach ($framework in $frameworks) {
+        $dependencyGroup = @($metadata.dependencies.group | Where-Object { $_.targetFramework -eq $framework })
+        $efDependency = @($dependencyGroup.dependency | Where-Object { $_.id -eq 'Microsoft.EntityFrameworkCore' })
+        $efMajor = ($framework -replace '^net', '').Split('.')[0]
+        if ($dependencyGroup.Count -ne 1 -or $efDependency.Count -ne 1 -or $efDependency[0].version -notmatch "^$efMajor\.") {
+            throw "Expected an EF Core $efMajor dependency for $framework."
+        }
         $assembly = "$scratch/package/lib/$framework/$packageId.dll"
         $pdb = "$scratch/symbols/lib/$framework/$packageId.pdb"
         if (!(Test-Path $assembly) -or !(Test-Path $pdb)) { throw "Missing DLL/PDB for $framework." }

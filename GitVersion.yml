@@ -1,4 +1,6 @@
 mode: ContinuousDeployment
+# Dropping .NET 8 is a breaking change. Remove this hint after v1.0.0 is tagged.
+next-version: 1.0.0
 tag-prefix: '[vV]?'
 assembly-versioning-scheme: MajorMinorPatch
 assembly-file-versioning-scheme: MajorMinorPatch

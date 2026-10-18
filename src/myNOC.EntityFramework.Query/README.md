@@ -10,8 +10,15 @@ Register the EF Core provider used by your application separately. To follow the
 SQLite examples, also install `Microsoft.EntityFrameworkCore.Sqlite`, using an
 EF Core version matching your target framework and other EF packages.
 
-Supports **.NET 8.0 and .NET 10.0** (LTS), using EF Core 8 and EF Core 10
-respectively. Match your application's Entity Framework packages to its target.
+**Breaking change in 1.0.0: .NET 8 and EF Core 8 support has been removed.**
+Upgrade to .NET 10 or .NET 11 before updating this package. Applications that
+remain on .NET 8 must use the earlier 0.x package line.
+
+Supports **.NET 10.0 and .NET 11.0**, using EF Core 10 and 11 respectively.
+.NET 10 is an LTS target. .NET 11 support currently uses
+[RC2](https://devblogs.microsoft.com/dotnet/dotnet-11-rc-2/) and EF Core
+**11.0.0-rc.2.26504.105**. Match your application's Entity Framework packages
+and database provider to its target and EF Core version.
 See the [repository build instructions](https://github.com/erenken/queryPattern#local-build-and-validation)
 to build the library/sample and run tests against both frameworks.
 
@@ -29,7 +36,7 @@ Trusted Publishing policy, not a permanent API key. See the
 
 ## Source Link debugging
 
-The `.snupkg` includes portable PDBs for .NET 8 and .NET 10. Source Link maps
+The `.snupkg` includes portable PDBs for .NET 10 and .NET 11. Source Link maps
 to the exact build commit and CI verifies matching source downloads/checksums.
 In Visual Studio, add `https://symbols.nuget.org/download/symbols` under
 **Tools > Options > Debugging > Symbols**, enable **Source Link support** and
