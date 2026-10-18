@@ -41,16 +41,23 @@ for configuration, multiple-context examples, and cancellation compatibility.
 dotnet add package myNOC.EntityFramework.Query
 ```
 
-The package, tests, and sample target **.NET 8.0 and .NET 10.0** (LTS).
-The .NET 8 asset uses the latest EF Core 8 servicing release; the .NET 10
-asset uses EF Core 10. EF Core 10 cannot run on .NET 8. Dependency reports
-may therefore show newer major versions for .NET 8; this is intentional.
+**Breaking change in 1.0.0: .NET 8 and EF Core 8 support has been removed.**
+Upgrade applications to .NET 10 or .NET 11 before updating this package.
+Applications remaining on .NET 8 must use the earlier 0.x package line.
+See the [release notes](./CHANGELOG.md).
+
+The package, tests, and sample target **.NET 10.0 and .NET 11.0**.
+The .NET 10 LTS asset uses EF Core 10.
+The .NET 11 asset uses EF Core **11.0.0-rc.2.26504.105**; .NET 11 support
+currently targets [RC2](https://devblogs.microsoft.com/dotnet/dotnet-11-rc-2/).
+Use matching versions of your application's EF Core provider and other EF packages.
+Dependency reports may show newer major versions for older targets; this is intentional.
 Test tooling uses the current stable MSTest, VSTest, Coverlet and NSubstitute.
 
 ## Local build and validation
 
-Install the .NET SDK selected by [global.json](./global.json), plus the
-.NET 8 runtime to run the .NET 8 tests. No .NET 9 SDK/runtime is needed.
+Install the .NET 11 RC2 SDK selected by [global.json](./global.json), plus the
+.NET 10 runtime to run the .NET 10 tests. No .NET 8 SDK/runtime is needed.
 Run these commands from the repository root:
 
 ```shell
@@ -64,6 +71,9 @@ dotnet list package --vulnerable --include-transitive
 ```
 
 Warnings are errors in every project. Tests run for both target frameworks.
+The library suppresses only NuGet's `NU5104` packaging warning because its
+.NET 11 asset intentionally depends on EF Core 11 RC2. Remove that exception
+when updating to EF Core 11 GA.
 PowerShell 7 is required for the versioning and package-validation scripts.
 To reproduce CI's version stamping locally:
 
@@ -91,6 +101,15 @@ props file used by restore, build and pack. It stamps `Version`, `PackageVersion
 `AssemblyVersion`, `FileVersion` and `InformationalVersion`. The informational
 version and NuGet repository metadata contain the exact build commit.
 
+For this breaking release, `next-version: 1.0.0` in GitVersion's configuration
+ensures the next release advances from 0.x to **1.0.0**, including after a squash
+merge. Remove the hint after `v1.0.0` is tagged; subsequent releases increment
+from that tag. The recommended commit/merge message is:
+
+```text
+Drop .NET 8 support and add .NET 11 / EF Core 11 support +semver: major
+```
+
 - `main` produces only stable `major.minor.patch` packages; two guards reject
   prereleases and publishing from any other branch.
 - A commit after `v1.2.3` produces `1.2.4`. Publishing creates `v1.2.4` on
@@ -103,7 +122,8 @@ version and NuGet repository metadata contain the exact build commit.
 - Avoid `+semver: none` for publishable changes: NuGet versions are immutable.
 
 [Test-Versioning.ps1](./scripts/Test-Versioning.ps1) exercises patch releases,
-stable tags, tagged reruns, previews, explicit minor/major increments and
+the 0.x-to-1.0.0 transition through a squash merge, retiring the version hint,
+stable tags, tagged reruns, previews, explicit minor/major increments, and
 merge-message increments in an isolated temporary Git repository.
 
 ## CI and Trusted Publishing
@@ -188,8 +208,8 @@ SQLite in-memory database, then runs list and scalar queries. No external databa
 server is required. Run it from the repository root for either supported target:
 
 ```shell
-dotnet run --project sample/QuerySample --framework net8.0
 dotnet run --project sample/QuerySample --framework net10.0
+dotnet run --project sample/QuerySample --framework net11.0
 ```
 
 The [tests](./tests/myNOC.Tests.EntityFramework.Query/) cover SQL translation and

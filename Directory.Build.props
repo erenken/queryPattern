@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
     <LangVersion>14.0</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -12,10 +12,10 @@
     <DebugSymbols>true</DebugSymbols>
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
-    <EntityFrameworkVersion Condition="'$(TargetFramework)' == 'net8.0'">8.0.32</EntityFrameworkVersion>
     <EntityFrameworkVersion Condition="'$(TargetFramework)' == 'net10.0'">10.0.12</EntityFrameworkVersion>
-    <DependencyInjectionVersion Condition="'$(TargetFramework)' == 'net8.0'">8.0.1</DependencyInjectionVersion>
+    <EntityFrameworkVersion Condition="'$(TargetFramework)' == 'net11.0'">11.0.0-rc.2.26504.105</EntityFrameworkVersion>
     <DependencyInjectionVersion Condition="'$(TargetFramework)' == 'net10.0'">10.0.12</DependencyInjectionVersion>
+    <DependencyInjectionVersion Condition="'$(TargetFramework)' == 'net11.0'">11.0.0-rc.2.26504.105</DependencyInjectionVersion>
   </PropertyGroup>
   <Import Project="$(VersionPropsFile)" Condition="'$(VersionPropsFile)' != '' and Exists('$(VersionPropsFile)')" />
 </Project>

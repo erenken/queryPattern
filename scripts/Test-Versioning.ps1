@@ -31,8 +31,29 @@ try {
     [System.IO.Directory]::CreateDirectory($scratch) | Out-Null
     Invoke-Git init --initial-branch=main
     Copy-Item "$root/GitVersion.yml" "$scratch/GitVersion.yml"
+    # Keep this regression scenario after the real 1.0.0 hint is retired.
+    $configuration = Get-Content "$scratch/GitVersion.yml" -Raw
+    $configuration = $configuration -replace '(?m)^next-version:.*\r?\n', ''
+    Set-Content "$scratch/GitVersion.yml" ("next-version: 1.0.0`n" + $configuration) -NoNewline
     Invoke-Git add GitVersion.yml
     Add-Commit 'Initial release'
+    Invoke-Git tag v0.1.6
+    Assert-Version '0.1.6'
+    Invoke-Git checkout -b work/net11
+    Set-Content "$scratch/frameworks.txt" 'net10.0;net11.0'
+    Invoke-Git add frameworks.txt
+    Add-Commit 'Drop .NET 8 and add .NET 11'
+    Assert-Version '1.0.0-alpha.net11.1'
+    Invoke-Git checkout main
+    Invoke-Git merge --squash work/net11
+    Add-Commit 'Drop .NET 8 and add .NET 11 (squashed without a version directive)'
+    Assert-Version '1.0.0'
+    Invoke-Git tag v1.0.0
+    Assert-Version '1.0.0'
+    Set-Content "$scratch/GitVersion.yml" $configuration -NoNewline
+    Invoke-Git add GitVersion.yml
+    Add-Commit 'Remove the completed next-version hint'
+    Assert-Version '1.0.1'
     Invoke-Git tag v1.2.3
     Assert-Version '1.2.3'
     Add-Commit 'Patch change'
