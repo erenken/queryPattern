@@ -48,15 +48,14 @@ See the [release notes](./CHANGELOG.md).
 
 The package, tests, and sample target **.NET 10.0 and .NET 11.0**.
 The .NET 10 LTS asset uses EF Core 10.
-The .NET 11 asset uses EF Core **11.0.0-rc.2.26504.105**; .NET 11 support
-currently targets [RC2](https://devblogs.microsoft.com/dotnet/dotnet-11-rc-2/).
+The .NET 11 asset uses EF Core **11.0.0**.
 Use matching versions of your application's EF Core provider and other EF packages.
 Dependency reports may show newer major versions for older targets; this is intentional.
 Test tooling uses the current stable MSTest, VSTest, Coverlet and NSubstitute.
 
 ## Local build and validation
 
-Install the .NET 11 RC2 SDK selected by [global.json](./global.json), plus the
+Install the .NET 11 SDK selected by [global.json](./global.json), plus the
 .NET 10 runtime to run the .NET 10 tests. No .NET 8 SDK/runtime is needed.
 Run these commands from the repository root:
 
@@ -71,9 +70,6 @@ dotnet list package --vulnerable --include-transitive
 ```
 
 Warnings are errors in every project. Tests run for both target frameworks.
-The library suppresses only NuGet's `NU5104` packaging warning because its
-.NET 11 asset intentionally depends on EF Core 11 RC2. Remove that exception
-when updating to EF Core 11 GA.
 PowerShell 7 is required for the versioning and package-validation scripts.
 To reproduce CI's version stamping locally:
 
@@ -214,4 +210,4 @@ dotnet run --project sample/QuerySample --framework net11.0
 
 The [tests](./tests/myNOC.Tests.EntityFramework.Query/) cover SQL translation and
 results, cancellation, assembly discovery, and isolation/disposal of multiple
-database contexts. Run both targets with `dotnet test QueryPattern.sln`.
+database contexts. Run both targets with `dotnet test QueryPattern.slnx`.

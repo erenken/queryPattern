@@ -52,10 +52,10 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-dotnet@v6.0.0
+      - uses: actions/setup-dotnet@v6.1.0
         with:
           global-json-file: global.json
-          dotnet-version: 10.0.401
+          dotnet-version: 11.0.100
       - name: Restore validation tools
         run: dotnet tool restore
       - name: Validate version scenarios

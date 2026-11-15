@@ -10,9 +10,9 @@
 
 ### Added
 
-- .NET 11 support with EF Core 11 RC2 (`11.0.0-rc.2.26504.105`), including
+- .NET 11 support with EF Core 11 (`11.0.0`), including
   SQLite sample and test coverage, NuGet assets, and debugging symbols.
-- Builds use the .NET 11 RC2 SDK. .NET 10 with EF Core 10 remains supported.
+- Builds use the .NET 11 SDK. .NET 10 with EF Core 10 remains supported.
 
 ### Release versioning
 

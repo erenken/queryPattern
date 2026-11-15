@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/.github/" />
+  <Folder Name="/.github/workflows/">
+    <File Path=".github/workflows/build-tests.yml" />
+    <File Path=".github/workflows/release.yml" />
+  </Folder>
+  <Folder Name="/sample/">
+    <Project Path="sample/QuerySample/QuerySample.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/myNOC.EntityFramework.Query/myNOC.EntityFramework.Query.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/myNOC.Tests.EntityFramework.Query/myNOC.Tests.EntityFramework.Query.csproj" />
+  </Folder>
+</Solution>
