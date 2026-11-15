@@ -15,9 +15,7 @@ Upgrade to .NET 10 or .NET 11 before updating this package. Applications that
 remain on .NET 8 must use the earlier 0.x package line.
 
 Supports **.NET 10.0 and .NET 11.0**, using EF Core 10 and 11 respectively.
-.NET 10 is an LTS target. .NET 11 support currently uses
-[RC2](https://devblogs.microsoft.com/dotnet/dotnet-11-rc-2/) and EF Core
-**11.0.0-rc.2.26504.105**. Match your application's Entity Framework packages
+.NET 10 is an LTS target. .NET 11 support uses EF Core **11.0.0**. Match your application's Entity Framework packages
 and database provider to its target and EF Core version.
 See the [repository build instructions](https://github.com/erenken/queryPattern#local-build-and-validation)
 to build the library/sample and run tests against both frameworks.
